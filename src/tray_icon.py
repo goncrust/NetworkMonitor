@@ -1,40 +1,24 @@
-import wx
-import wx.adv
+import pystray
+from PIL import Image
 
 
-class TaskBar(wx.adv.TaskBarIcon):
-    def __init__(self, frame):
-        self.frame = frame
-        super(TaskBar, self).__init__()
-        icon = wx.IconFromBitmap(wx.BitMap('icon.jpeg'))
-        self.SetIcon(icon, "Netowrk")
-        self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.left_down)
+class TrayIcon:
 
-    def CreatePopupMenu(self):
-        menu = wx.Menu()
+    def __init__(self):
+        self.tray = pystray.Icon("network tray", menu=self.create_menu())
+        self.tray.icon = self.load_image("media/icon.jpeg")
 
-        self.rcvItem = wx.MenuItem(menu, -1, "Received")
-        self.sntItem = wx.MenuItem(menu, -1, "Sent")
+        self.tray.run()
 
-        menu.Append(self.rcvItem)
-        menu.AppendSeparator()
-        menu.Append(self.sntItem)
+    def create_menu(self):
+        return pystray.Menu(pystray.MenuItem("Download", action=None), pystray.MenuItem(
+            "Upload", action=None), pystray.MenuItem("Quit", action=self.quit))
 
-    def on_exit(self, event):
-        wx.CallAfter(self.Destroy)
-        self.frame.close()
+    def quit(self):
+        self.tray.stop()
 
-    def left_down(self):
-        return
+    def load_image(self, path):
+        return Image.open(path)
 
 
-class MonitorApp(wx.App):
-    def OnInit(self):
-        frame = wx.Frame(None)
-        self.SetTopWindow(frame)
-        TaskBar(frame)
-        return True
-
-
-app = MonitorApp(False)
-app.MainLoop()
+TrayIcon()
